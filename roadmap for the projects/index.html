@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeVisionaries | Learning Journey</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+  <canvas class="webgl"></canvas>
+  <style>
+  
+    #hero {
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+  
+    .hero-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+  
+    .dynamic-gradient {
+      font-size: 4rem;
+      line-height: 1.1;
+      background: linear-gradient(45deg, #00bcd4, #ff4081);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 1.5rem;
+    }
+  
+    .typewriter {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 2rem;
+    }
+  
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+    }
+  
+    .cta-button {
+      padding: 1rem 2rem;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+  
+    .cta-button:not(.outline) {
+      background: #00bcd4;
+      color: white;
+    }
+  
+    .cta-button.outline {
+      border: 2px solid #00bcd4;
+      color: #00bcd4;
+    }
+  
+    .hero-stats {
+      display: flex;
+      gap: 2rem;
+      justify-content: flex-end;
+    }
+  
+    .stat-card {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+  
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: bold;
+      background: linear-gradient(45deg, #00bcd4, #ff4081);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  
+    .scroll-prompt {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation: bounce 2s infinite;
+    }
+  
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
+    }
+  
+    @media (max-width: 768px) {
+      .hero-content {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+      .cta-buttons {
+        flex-direction: column;
+      }
+      .hero-stats {
+        justify-content: center;
+      }
+      .dynamic-gradient {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
+  <!-- Navigation -->
+  <style>
+    /* Navigation Styles */
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      width: 100%;
+      top: 0;
+      z-index: 1000;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+  
+    .nav-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+  
+    .logo-gradient {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, #00bcd4, #ff4081);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  
+    .nav-subtitle {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+  
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
+  
+    .nav-link {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+  
+    .nav-link:hover {
+      color: #00bcd4;
+    }
+  
+    .hover-glow:hover {
+      text-shadow: 0 0 10px rgba(0, 188, 212, 0.5);
+    }
+  
+    .menu-toggle {
+      display: none;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+  
+    .hamburger {
+      width: 25px;
+      height: 2px;
+      background: white;
+      position: relative;
+      transition: 0.3s;
+    }
+  
+    .hamburger::before,
+    .hamburger::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      transition: 0.3s;
+    }
+  
+    .hamburger::before { top: -8px; }
+    .hamburger::after { top: 8px; }
+  
+   
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.9);
+        flex-direction: column;
+        padding: 1rem;
+        text-align: center;
+      }
+  
+      .nav-links.active {
+        display: flex;
+      }
+  
+      .menu-toggle {
+        display: block;
+      }
+  
+      .menu-toggle.active .hamburger {
+        background: transparent;
+      }
+  
+      .menu-toggle.active .hamburger::before {
+        transform: rotate(45deg) translate(5px, 6px);
+      }
+  
+      .menu-toggle.active .hamburger::after {
+        transform: rotate(-45deg) translate(5px, -6px);
+      }
+    }
+  </style>
+  
+
+  <script>
+    document.querySelector('.menu-toggle').addEventListener('click', () => {
+      document.querySelector('.nav-links').classList.toggle('active');
+      document.querySelector('.menu-toggle').classList.toggle('active');
+    });
+  </script>
+
+  <section id="hero" class="fullscreen-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="dynamic-gradient">Full-Stack Learning Journey</h1>
+
+        <p class="typewriter">50 mini Projects | 2 Developers | 1 Vision</p>
+        <div class="cta-buttons">
+          <a href="https://github.com/Kameshnic"  class="cta-button">Explore Projects</a>
+          <a href="#roadmap" class="cta-button outline">Learning Path</a>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-card">
+          <div class="stat-number">50 mini projects</div>
+          <div class="stat-label">Projects</div>
+        </div>
+       
+      </div>
+    </div>
+    <div class="scroll-prompt">
+      <div class="scroll-arrow"></div>
+    </div>
+  </section>
+
+
+  <section id="team" class="section">
+    <h2 class="section-title">Development Team</h2>
+    <div class="team-container">
+     
+      <div class="team-card glassmorphism">
+        <div class="member-header">
+          <div class="member-photo" style="background-image: url('https://img.freepik.com/free-photo/person-playing-3d-video-games-device_23-2151005751.jpg?semt=ais_hybrid')"></div>
+          <div class="member-info">
+            <h3>Kamesh S</h3>
+            <p class="member-role">Aspiring Developer</p>
+          </div>
+        </div>
+        <div class="member-details">
+          <p class="member-quote">"Building scalable systems through iterative learning"</p>
+          <div class="focus-areas">
+            <h4>Current Focus:</h4>
+            <ul>
+              <li>Learning Basics in web dev</li>
+              <li>Learning How to be strong with ideations</li>
+              <li>Learning the art of ignoring negativity</li>
+            </ul>
+          </div>
+          <div class="member-social">
+            <a href="https://github.com/Kameshnic" class="social-link"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/kamesh-s-b71359271" class="social-link"><i class="fab fa-linkedin"></i></a>
+        
+          </div>
+        </div>
+      </div>
+
+    
+      <div class="team-card glassmorphism">
+        <div class="member-header">
+          <div class="member-photo" style="background-image: url('https://img.freepik.com/free-vector/cute-girl-hacker-operating-laptop-cartoon-vector-icon-illustration-people-technology-isolated-flat_138676-9487.jpg')"></div>
+          <div class="member-info">
+            <h3>Swetha V</h3>
+            <p class="member-role">Aspiring Developer</p>
+          </div>
+        </div>
+        <div class="member-details">
+          <p class="member-quote">"Crafting intuitive user experiences through continuous iteration"</p>
+          <div class="focus-areas">
+            <h4>Current Focus:</h4>
+            <ul>
+                <li>Learning How to Collaborate</li>
+                <li>Learning How to be optimisitic</li>
+                <li>Learning the art of communication</li>
+            </ul>
+          </div>
+        
+
+
+          <div class="member-social">
+            <a href="https://github.com/Swethave" class="social-link"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/swetha-v-087904276" class="social-link"><i class="fab fa-linkedin"></i></a>
+           
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+<section id="roadmap" class="section">
+  <h2 class="section-title">This is the Learning path we are going to follow!</h2>
+  <div class="roadmap-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+
+  
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-number">1</div>
+        <h3>Foundations of Web Development</h3>
+      </div>
+      <ul class="phase-skills">
+        <li>HTML5: Structure & Semantics</li>
+        <li>CSS3: Layouts, Flexbox, Grid</li>
+        <li>JavaScript Basics: Variables, Loops, Functions</li>
+        <li>Version Control: Git & GitHub</li>
+      </ul>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-number">2</div>
+        <h3>Interactive Frontend Development</h3>
+      </div>
+      <ul class="phase-skills">
+        <li>DOM Manipulation with JavaScript</li>
+        <li>ES6+ Concepts (Promises, Async/Await, Modules)</li>
+        <li>Responsive Design with Media Queries</li>
+        <li>CSS Preprocessors (SASS/SCSS)</li>
+        <li>Basic UI Frameworks: TailwindCSS / Bootstrap</li>
+      </ul>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-number">3</div>
+        <h3>Frontend Mastery</h3>
+      </div>
+      <ul class="phase-skills">
+        <li>React.js: Components, State, Props</li>
+        <li>React Router & State Management (Redux/Zustand)</li>
+        <li>API Integration (REST & GraphQL)</li>
+        <li>Authentication with JWT</li>
+        <li>UI Libraries: Material UI / Shadcn</li>
+      </ul>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-number">4</div>
+        <h3>Backend Development</h3>
+      </div>
+      <ul class="phase-skills">
+        <li>Node.js & Express.js</li>
+        <li>RESTful API Development</li>
+        <li>Database Management (MongoDB, MySQL, PostgreSQL)</li>
+        <li>Authentication & Authorization</li>
+        <li>Error Handling & Logging</li>
+      </ul>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-number">5</div>
+        <h3>Full-Stack Application Development</h3>
+      </div>
+      <ul class="phase-skills">
+        <li>Integrating Frontend & Backend</li>
+        <li>State Management with APIs</li>
+        <li>File Uploads & Management</li>
+        <li>Payment Gateway Integration</li>
+        <li>Building Admin Dashboards</li>
+      </ul>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-number">6</div>
+        <h3>Deployment & DevOps</h3>
+      </div>
+      <ul class="phase-skills">
+        <li>Docker & Containerization</li>
+        <li>CI/CD Pipelines</li>
+        <li>Cloud Platforms: AWS, Azure, GCP</li>
+        <li>Nginx & Reverse Proxy</li>
+        <li>Server Monitoring & Logs</li>
+      </ul>
+    </div>
+
+  
+    <div class="phase-card">
+      <div class="phase-header">
+        <div class="phase-number">7</div>
+        <h3>Advanced Concepts & System Design</h3>
+      </div>
+      <ul class="phase-skills">
+        <li>Data Structures & Algorithms</li>
+        <li>System Design Fundamentals</li>
+        <li>Microservices Architecture</li>
+        <li>Message Queues (RabbitMQ, Kafka)</li>
+        <li>Performance Optimization & Caching</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<style>
+ 
+    .glass-contact {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(15px);
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+  
+    .contact-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+  
+    .collab-cta h2 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      background: linear-gradient(45deg, #00bcd4, #ff4081);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  
+    .contact-info {
+      margin-top: 2rem;
+    }
+  
+    .info-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+  
+    .collab-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  
+    .form-group {
+      display: flex;
+      gap: 1rem;
+    }
+  
+    .form-input, .form-message {
+      width: 100%;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: white;
+      transition: all 0.3s ease;
+    }
+  
+    .form-input:focus, .form-message:focus {
+      outline: none;
+      border-color: #00bcd4;
+      box-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+    }
+  
+    .quantum-button {
+      background: linear-gradient(45deg, #00bcd4, #ff4081);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+  
+    @media (max-width: 768px) {
+      .contact-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+      }
+      .form-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+  
+
+
+  <section id="contact" class="section glass-contact">
+    <div class="contact-container">
+      <div class="collab-cta">
+        <h2>Collaborate With Us</h2>
+        <p>Join our learning journey and contribute to real-world projects</p>
+        <div class="contact-info">
+          <div class="info-item">
+            <i class="fas fa-envelope"></i>
+            <p>kameshnic2885@gmail.com</p>
+          </div>
+          <div class="info-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <p>TamilNadu,India</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="main.js"></script>
+</body>
+</html>
